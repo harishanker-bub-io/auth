@@ -25,6 +25,10 @@ async function signInWithGithub() {
   })
 }
 
+definePageMeta({
+  middleware: ["auth"],
+});
+
 </script>
 
 <template>

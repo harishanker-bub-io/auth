@@ -3,8 +3,7 @@ import { ref } from "vue";
 const user = useSupabaseUser();
 const supabase = useSupabaseClient();
 const submitted = ref(false);
-
-console.log(user.value)
+const showMagicLinkForm = ref(false);
 
 
 const submitHandler = async (data) => {
@@ -26,6 +25,23 @@ async function signInWithGithub() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
   })
+  console.log(data, error)
+}
+
+async function signInWithMagicLink(formData) {
+  console.log(formData)
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email: formData.email,
+    options: {
+      // set this to false if you do not want the user to be automatically signed up
+      shouldCreateUser: false,
+      // emailRedirectTo: data,
+    },
+  })
+  console.log(data, error)
+  if(data){
+    navigateTo("/")
+  }
 }
 
 definePageMeta({
@@ -36,14 +52,15 @@ definePageMeta({
 <template>
   <div class="w-full h-[100vh] flex flex-col justify-center items-center bg-slate-300">
     <div class="w-[300px]">
+      <!-- Form for email and password login -->
       <FormKit
         type="form"
-        id="registration-example"
+        id="email-password-form"
         :form-class="submitted ? 'hide' : 'show'"
-        submit-label="Register"
+        submit-label="Login"
         @submit="submitHandler"
         :actions="false"
-        #default="{ value }"
+        v-if="!showMagicLinkForm"
       >
         <h1 class="text-2xl font-bold mb-2 text-center">Login</h1>
         <FormKit
@@ -70,17 +87,40 @@ definePageMeta({
 
         <FormKit type="submit" label="Login" />
       </FormKit>
+
+      <!-- Form for magic link login -->
+      <FormKit
+        type="form"
+        id="magic-link-form"
+        :form-class="submitted ? 'hide' : 'show'"
+        submit-label="Login"
+        @submit="signInWithMagicLink"
+        :actions="false"
+        v-else
+      >
+        <h1 class="text-2xl font-bold mb-2 text-center">Login with Magic Link</h1>
+        <FormKit
+          type="text"
+          name="email"
+          label="Your email"
+          placeholder="jane@example.com"
+          help="What email should we use?"
+          validation="required|email"
+        />
+        <!-- Magic link form doesn't require password input -->
+        <div class="double">
+        </div>
+
+        <FormKit type="submit" label="Login" />
+      </FormKit>
+
       <hr class="border border-black"/>
-      <NuxtLink to="/signup">Not a user ? Signup</NuxtLink>
+      <NuxtLink to="/signup">Not a user? Signup</NuxtLink>
     </div>
 
-    <div class="flex justify-between items-center w-[300px] mt-4"   >
-        <FormKit type="submit" label="github"  @click="signInWithGithub"/>
-        <FormKit type="submit" label="magiclink" />
+    <div class="flex justify-between items-center w-[300px] mt-4">
+      <FormKit type="submit" label="GitHub" @click="signInWithGithub"/>
+      <FormKit type="submit" label="Magic Link" @click="showMagicLinkForm = !showMagicLinkForm"/>
     </div>
-  </div>
-
-  <div v-if="submitted">
-    <h2 class="text-xl text-green-500">Submission successful!</h2>
   </div>
 </template>
