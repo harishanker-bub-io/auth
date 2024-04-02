@@ -1,13 +1,30 @@
 <script setup>
 import { ref } from "vue";
+const user = useSupabaseUser();
+console.log(user)
+  const supabase = useSupabaseClient();
+
 const submitted = ref(false);
 const submitHandler = async (data) => {
-  console.log(data);
+  await signUpNewUser(data)
+  
 };
 
-definePageMeta({
-  middleware: ["auth"],
-});
+async function signUpNewUser(form) {
+  const { data, error } = await supabase.auth.signUp({
+    email: form.email,
+    password: form.password,
+    user_metadata: { name: form.name}
+    
+  })
+}
+
+async function signInWithGithub() {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+  })
+}
+
 </script>
 
 <template>
@@ -68,11 +85,7 @@ definePageMeta({
     </div>
 
     <div class="flex justify-between items-center w-[300px] mt-4"   >
-        <FormKit type="submit" label="github" />
+        <FormKit type="submit" label="github"  @click="signInWithGithub"/>
     </div>
-  </div>
-
-  <div v-if="submitted">
-    <h2 class="text-xl text-green-500">Submission successful!</h2>
   </div>
 </template>

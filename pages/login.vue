@@ -1,9 +1,32 @@
 <script setup>
 import { ref } from "vue";
+const user = useSupabaseUser();
+const supabase = useSupabaseClient();
 const submitted = ref(false);
+
+console.log(user.value)
+
+
 const submitHandler = async (data) => {
   console.log(data);
+  signInWithEmail(data)
 };
+
+async function signInWithEmail(form) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: form.email,
+    password: form.password,
+  })
+  if(data){
+    navigateTo("/")
+  }
+}
+
+async function signInWithGithub() {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+  })
+}
 
 definePageMeta({
   middleware: ["auth"],
@@ -45,14 +68,14 @@ definePageMeta({
           />
         </div>
 
-        <FormKit type="submit" label="Register" />
+        <FormKit type="submit" label="Login" />
       </FormKit>
       <hr class="border border-black"/>
       <NuxtLink to="/signup">Not a user ? Signup</NuxtLink>
     </div>
 
     <div class="flex justify-between items-center w-[300px] mt-4"   >
-        <FormKit type="submit" label="github" />
+        <FormKit type="submit" label="github"  @click="signInWithGithub"/>
         <FormKit type="submit" label="magiclink" />
     </div>
   </div>
