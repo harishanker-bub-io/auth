@@ -7,7 +7,7 @@
   <div class="p-4 max-w-md mx-auto">
     <h1 class="text-2xl font-bold mb-4">Todo List</h1>
     <div
-      class="flex h-8 justify-around items-center border border-grey-400 mr-3 mb-4 cursor-pointer"
+      class="flex h-8 justify-around items-center border border-grey  -400 mr-3 mb-4 cursor-pointer"
     >
       <button
         @click="showPrompt = false"
@@ -138,10 +138,9 @@ onBeforeMount(async()=> {
 })
 
 async function addTodosUsingAi(formData) {
-  const prompt2 =
-    "always return an array either, this array will contains the tasks based on the above text, each item in the array should have fields as created_at, title, completed_time, User_id, and completed if no tasks then return an empty array";
-  const prompt = formData.instructions + "\n" + prompt2;
-  console.log(prompt);
+  let prompt =
+    "always return an array either with item or empty nothing except an array, this array will contains the tasks based on the above text,if the text title is not clear return empty array, each item in the array should have fields as created_at, title, completed_time, User_id, and completed if no tasks then return an empty array";
+   prompt = prompt + "\n" + formData.instructions;
   
   // Await the model response
   const result = await model.generateContent(prompt);
@@ -149,18 +148,22 @@ async function addTodosUsingAi(formData) {
   // Extract response from result
   const response = await result.response;
   
-  // Convert response to text (if needed)
-  const text = response.text();
-  // Parse the text into an array
-  console.log(text)
-  const tasks = JSON.parse(text);
+  // Convert response to text
+  let text = response.text();
+  // Find the index of the opening and closing square brackets
+  const startIndex = text.indexOf("[");
+  const endIndex = text.lastIndexOf("]");
+  
+  // Extract the array substring
+  const arraySubstring = text.substring(startIndex, endIndex + 1);
 
+  // Parse the substring into an array
+  const tasks = JSON.parse(arraySubstring);
   // Iterate over response array and add each task
   tasks.forEach((item) => {
     addTodo(item); 
   });
 }
-
 
 const addTodo = async (formData) => {
   // console.log(formData);
