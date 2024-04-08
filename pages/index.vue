@@ -139,7 +139,7 @@ onBeforeMount(async()=> {
 
 async function addTodosUsingAi(formData) {
   let prompt =
-    "always return an array either with item or empty nothing except an array, this array will contains the tasks based on the above text,if the text title is not clear return empty array, each item in the array should have fields as created_at, title, completed_time, User_id, and completed if no tasks then return an empty array";
+    "always return an array either with item or empty nothing except an array, this array will contains the tasks based on the above text,if the text title is not clear return empty array, each item in the array should be an object and have fields as title if no tasks then return an empty array";
    prompt = prompt + "\n" + formData.instructions;
   
   // Await the model response
@@ -154,9 +154,10 @@ async function addTodosUsingAi(formData) {
   const startIndex = text.indexOf("[");
   const endIndex = text.lastIndexOf("]");
   
+  // console.log(text)
   // Extract the array substring
   const arraySubstring = text.substring(startIndex, endIndex + 1);
-
+  // console.log(arraySubstring)
   // Parse the substring into an array
   const tasks = JSON.parse(arraySubstring);
   // Iterate over response array and add each task
