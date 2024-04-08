@@ -1,8 +1,5 @@
 export default defineNuxtRouteMiddleware((to, from) => {
-    console.log(to.path)
-    console.log(from.path)
     const user = useSupabaseUser()
-    console.log('user.value is',user.value)
     if (to.path === '/login' || to.path === '/signup') {
         console.log('login path');
         if (user.value) {

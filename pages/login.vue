@@ -7,7 +7,6 @@ const showMagicLinkForm = ref(false);
 
 
 const submitHandler = async (data) => {
-  console.log(data);
   signInWithEmail(data)
 };
 
@@ -25,11 +24,11 @@ async function signInWithGithub() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
   })
-  console.log(data, error)
+  // console.log(data, error)
 }
 
 async function signInWithMagicLink(formData) {
-  console.log(formData)
+  // console.log(formData)
   const { data, error } = await supabase.auth.signInWithOtp({
     email: formData.email,
     options: {
@@ -38,7 +37,7 @@ async function signInWithMagicLink(formData) {
       // emailRedirectTo: data,
     },
   })
-  console.log(data, error)
+  // console.log(data, error)
   if(data){
     navigateTo("/")
   }
