@@ -159,8 +159,8 @@ onBeforeMount(async () => {
 });
 
 // Gemini configuration
-let model = genAI.getGenerativeModel({ model: "gemini-pro" });
-const chat = model.startChat({
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+let chat = model.startChat({
   history: [
     ...chatHistory.value
   ],
@@ -186,7 +186,7 @@ const acceptOutput = () => {
   try {
     // Access the last element from history
     const res = chatHistory.value[chatHistory.value.length - 1].parts[0].text; // Use array indexing to get the last element
-    console.log(res)
+    console.log('output is: ',res)
     const firstIndex = res.indexOf("["); // Find the index of the first '[' character
     const lastIndex = res.lastIndexOf("]"); // Find the index of the last ']' character
     console.log("firstIndex", firstIndex, lastIndex)
@@ -195,7 +195,6 @@ const acceptOutput = () => {
       const array = JSON.parse(arrayString); // Parse the string to array
       console.log(array)
       // reset the model
-      model = genAI.getGenerativeModel({ model: "gemini-pro" });
       chatHistory.value  = [...defaultPrompt]
        chat = model.startChat({
         history: [
