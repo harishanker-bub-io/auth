@@ -1,7 +1,7 @@
 export default defineNuxtRouteMiddleware((to, from) => {
     const user = useSupabaseUser()
     if (to.path === '/login' || to.path === '/signup') {
-        console.log('login path');
+        // console.log('login path');
         if (user.value) {
           return navigateTo('/');
         }
@@ -9,7 +9,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
         return;
       }
       if (!user.value) {
-        console.log("login first");
+        // console.log("login first");
         return navigateTo('/login');
       }
       return;
