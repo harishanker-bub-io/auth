@@ -17,6 +17,11 @@
 const supabase = useSupabaseClient();
 const user = useSupabaseUser()
 
-
+async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (!error) {
+      navigateTo("/login");
+    }
+}
 
 </script>

@@ -196,7 +196,8 @@ const acceptOutput = () => {
       console.log(array)
       // reset the model
       model = genAI.getGenerativeModel({ model: "gemini-pro" });
-      const chat = model.startChat({
+      chatHistory.value  = [...defaultPrompt]
+       chat = model.startChat({
         history: [
           ...defaultPrompt
         ],
