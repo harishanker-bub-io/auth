@@ -13,9 +13,8 @@
     </div>
     <!-- Chat Box -->
     <div v-if="showPrompt"
-   
       class="chat-box border rounded-lg p-4 mb-4 w-[400px] min-h-[500px] flex justify-end flex-col items-center">
-      <div class="overflow-y-scroll scroll-smooth	"  ref="chatBox">
+      <div class="overflow-y-scroll scroll-smooth	" ref="chatBox">
         <div v-for="(message, index) in chatHistory" :key="index" class="flex mb-2 w-full over">
           <!-- User message -->
           <div v-if="message.role === 'user'" class="flex w-full items-center justify-end">
@@ -43,12 +42,16 @@
       </div>
       <div class=" border-t-2 w-full text-center flex gap-2 justify-around">
         <!-- Send Prompt Button -->
-        <button @click="startAiConversation" class="btn-send-prompt bg-blue-500 text-white px-4 py-2 rounded-lg">
+        <button @click="startAiConversation" :disabled="buttonDisabled"
+          class="btn-send-prompt bg-blue-500 text-white px-4 py-2 rounded-lg">
           Send Prompt
         </button>
-
+        <div v-if="loading" class="text-center px-2 py-2">
+          <div class="spinner1 "></div>
+        </div>
         <!-- Accept Output Button -->
-        <button @click="acceptOutput" class="btn-accept-output bg-green-500 text-white px-2 py-2 rounded-lg">
+        <button @click="acceptOutput" :disabled="buttonDisabled"
+          class="btn-accept-output bg-green-500 text-white px-2 py-2 rounded-lg">
           Accept Output
         </button>
       </div>
@@ -128,7 +131,7 @@ const defaultPrompt = [
       1. If the task description is simple and clear, create a task with the provided description.
       2. If the task description is complex or unclear, ask the user for clarification or provide suggestions for subtasks.
       3. Once the user is satisfied with the task description, confirm with the user before adding it to the list of tasks.
-      4. After all tasks have been collected, generate the final array of tasks where each item contains title of each task and provide it to the user, output should contain just an array in the format [{"title": "someTitle"}] and nothing else.
+      4. After all tasks have been collected, generate the final array of tasks where each item contains title of each task and provide it to the user, output should contain just an array in the format [{"title": "someTitle"}] and never return an empty response always respond with something.
       `}],
   },
   {
@@ -147,6 +150,8 @@ const genAI = new GoogleGenerativeAI(config.public.apiKey);
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 let todos = ref(null);
+const buttonDisabled = ref(false)
+const loading = ref(false)
 
 onBeforeMount(async () => {
   // Fetching the todos form the supabase
@@ -172,21 +177,28 @@ let chat = model.startChat({
 
 // to add tasks using ai with chat like feature
 async function startAiConversation() {
+  buttonDisabled.value = true;
+  loading.value = true;
   let msg = chatInput.value;
   const result = await chat.sendMessage(msg);
   const response = await result.response;
   const text = response.text();
   console.log("response is: ", text)
   chatHistory.value = await chat.getHistory()
+  // Scroll to bottom whenever chat history changes
+  scrollToBottom();
   chatInput.value = "";
+  buttonDisabled.value = false;
+  loading.value = false;
 }
 
 // To accept the final response by the ai which contains an array of todos
 const acceptOutput = () => {
   try {
+    buttonDisabled.value = true;
     // Access the last element from history
     const res = chatHistory.value[chatHistory.value.length - 1].parts[0].text; // Use array indexing to get the last element
-    console.log('output is: ',res)
+    console.log('output is: ', res)
     const firstIndex = res.indexOf("["); // Find the index of the first '[' character
     const lastIndex = res.lastIndexOf("]"); // Find the index of the last ']' character
     console.log("firstIndex", firstIndex, lastIndex)
@@ -195,8 +207,8 @@ const acceptOutput = () => {
       const array = JSON.parse(arrayString); // Parse the string to array
       console.log(array)
       // reset the model
-      chatHistory.value  = [...defaultPrompt]
-       chat = model.startChat({
+      chatHistory.value = [...defaultPrompt]
+      chat = model.startChat({
         history: [
           ...defaultPrompt
         ],
@@ -217,6 +229,8 @@ const acceptOutput = () => {
     console.error(error);
     alert("No array found in the response try a response which contains an array [].");
     return null;
+  } finally {
+    buttonDisabled.value = false;
   }
 }
 
@@ -273,22 +287,18 @@ const deleteToDo = async (id) => {
 onMounted(() => {
   // Scroll to bottom when component is mounted
   scrollToBottom();
-
-});
-
-watch(chatHistory, () => {
-  // Scroll to bottom whenever chat history changes
-  scrollToBottom();
 });
 
 const scrollToBottom = () => {
   // Use nextTick to wait for DOM update before scrolling
-  nextTick(() => {
+  setTimeout(() => {
+    nextTick(() => {
       if (chatBox.value) {
+        console.log(chatBox.value.scrollHeight)
         chatBox.value.scrollTop = chatBox.value.scrollHeight;
       }
-    
-  });
+    });
+  }, 100)
 };
 
 definePageMeta({
@@ -332,5 +342,21 @@ definePageMeta({
   /* Light blue background */
   color: #007bff;
   /* Blue */
+}
+
+/* Custom Spinner Animation */
+.spinner1 {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #3b82f6;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    /* transform: rotate(360deg); */
+  }
 }
 </style>
