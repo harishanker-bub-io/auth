@@ -16,22 +16,24 @@
       class="chat-box border rounded-lg p-4 mb-4 w-[400px] min-h-[500px] flex justify-end flex-col items-center">
       <div class="overflow-y-scroll scroll-smooth	" ref="chatBox">
         <div v-for="(message, index) in chatHistory" :key="index" class="flex mb-2 w-full over">
-          <!-- User message -->
-          <div v-if="message.role === 'user'" class="flex w-full items-center justify-end">
-            <div class="user-message ml-2 bg-blue-100 p-2 rounded-lg">
-              {{ message?.parts[0].text }}
+          <div v-if="index > 0">
+            <!-- User message -->
+            <div v-if="message.role === 'user'" class="flex w-full items-center justify-end">
+              <div class="user-message ml-2 bg-blue-100 p-2 rounded-lg">
+                {{ message?.parts[0]?.text }}
+              </div>
+              <div class="user-avatar flex-shrink-0">
+                <img src="/public/user-avatar.png" alt="User Avatar" class="w-8 h-8 rounded-full">
+              </div>
             </div>
-            <div class="user-avatar flex-shrink-0">
-              <img src="/public/user-avatar.png" alt="User Avatar" class="w-8 h-8 rounded-full">
-            </div>
-          </div>
-          <!-- AI message -->
-          <div v-else class="flex items-end justify-end">
-            <div class="ai-avatar flex-shrink-0">
-              <img src="/public/ai-avatar.png" alt="AI Avatar" class="w-8 h-8 rounded-full">
-            </div>
-            <div class="chat-message mr-2 bg-gray-200 p-2 rounded-lg">
-              {{ message?.parts[0].text }}
+            <!-- AI message -->
+            <div v-else class="flex items-end justify-end">
+              <div class="ai-avatar flex-shrink-0">
+                <img src="/public/ai-avatar.png" alt="AI Avatar" class="w-8 h-8 rounded-full">
+              </div>
+              <div class="chat-message mr-2 bg-gray-200 p-2 rounded-lg">
+                {{ message?.parts[0]?.text }}
+              </div>
             </div>
           </div>
         </div>
@@ -145,7 +147,7 @@ const chatInput = ref("");
 // being used for scroll behaviour
 const chatBox = ref(null);
 // to show the ai input or the normal input
-const showPrompt = ref(true);
+const showPrompt = ref(true); 
 const genAI = new GoogleGenerativeAI(config.public.apiKey);
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
