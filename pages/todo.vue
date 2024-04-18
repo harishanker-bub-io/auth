@@ -13,7 +13,7 @@
     </div>
     <!-- Chat Box -->
     <div v-if="showPrompt"
-      class="chat-box border rounded-lg p-4 mb-4 w-[400px] min-h-[500px] flex justify-end flex-col items-center">
+      class="chat-box border rounded-lg mb-4 w-[400px] min-h-[500px] flex justify-end flex-col items-center">
       <div class="overflow-y-scroll scroll-smooth	" ref="chatBox">
         <div v-for="(message, index) in chatHistory" :key="index" class="flex mb-2 w-full over">
           <div v-if="index > 0">
@@ -43,7 +43,7 @@
           <input v-model="chatInput" required class="w-[390px] h-10 border border-gray-300 rounded-lg pl-2"
             placeholder="Enter your prompt"></input>
         </div>
-        <div class=" border-t-2 w-full text-center flex gap-2 justify-around">
+        <div class=" border-t-2 w-full text-center flex gap-2 justify-around p-2">
           <!-- Send Prompt Button -->
           <button v-if="!loading" :disabled="buttonDisabled"
             class="btn-send-prompt bg-blue-500 text-white px-4 py-2 rounded-lg">
@@ -52,11 +52,6 @@
           <div v-else class="text-center px-2 py-2">
             <div class="spinner1 "></div>
           </div>
-          <!-- Accept Output Button -->
-          <!-- <button @click="acceptOutput" :disabled="buttonDisabled"
-          class="btn-accept-output bg-green-500 text-white px-2 py-2 rounded-lg">
-          Accept Output
-        </button> -->
         </div>
       </form>
     </div>
@@ -306,14 +301,13 @@ const deleteToDo = async (id) => {
 onMounted(() => {
   // Scroll to bottom when component is mounted
   scrollToBottom();
-});
+}); 
 
 const scrollToBottom = () => {
   // Use nextTick to wait for DOM update before scrolling
   setTimeout(() => {
     nextTick(() => {
       if (chatBox.value) {
-        console.log(chatBox.value.scrollHeight)
         chatBox.value.scrollTop = chatBox.value.scrollHeight;
       }
     });
