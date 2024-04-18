@@ -32,7 +32,7 @@ jobs:
       HOST_NAME: Earthly
     steps:
       - name: Print certificate
-        run: echo "$ {{ variables.API_KEY }}  " | base64 --decode
+        run: echo "${{ secrets.API_KEY }}" | base64 --decode
       - name: Checkout
         uses: actions/checkout@v4
       - name: Detect package manager
