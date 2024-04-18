@@ -38,25 +38,27 @@
           </div>
         </div>
       </div>
-      <div>
-        <input v-model="chatInput" class="w-[390px] h-10 border border-gray-300 rounded-lg pl-2"
-          placeholder="Enter your prompt"></input>
-      </div>
-      <div class=" border-t-2 w-full text-center flex gap-2 justify-around">
-        <!-- Send Prompt Button -->
-        <button @click="startAiConversation" :disabled="buttonDisabled"
-          class="btn-send-prompt bg-blue-500 text-white px-4 py-2 rounded-lg">
-          Send Prompt
-        </button>
-        <div v-if="loading" class="text-center px-2 py-2">
-          <div class="spinner1 "></div>
+      <form @submit.prevent="startAiConversation">
+        <div>
+          <input v-model="chatInput" required class="w-[390px] h-10 border border-gray-300 rounded-lg pl-2"
+            placeholder="Enter your prompt"></input>
         </div>
-        <!-- Accept Output Button -->
-        <button @click="acceptOutput" :disabled="buttonDisabled"
+        <div class=" border-t-2 w-full text-center flex gap-2 justify-around">
+          <!-- Send Prompt Button -->
+          <button v-if="!loading" :disabled="buttonDisabled"
+            class="btn-send-prompt bg-blue-500 text-white px-4 py-2 rounded-lg">
+            Send Prompt
+          </button>
+          <div v-else class="text-center px-2 py-2">
+            <div class="spinner1 "></div>
+          </div>
+          <!-- Accept Output Button -->
+          <!-- <button @click="acceptOutput" :disabled="buttonDisabled"
           class="btn-accept-output bg-green-500 text-white px-2 py-2 rounded-lg">
           Accept Output
-        </button>
-      </div>
+        </button> -->
+        </div>
+      </form>
     </div>
     <!-- input form for pompt -->
     <!-- <FormKit
@@ -144,10 +146,10 @@ const defaultPrompt = [
 const config = useRuntimeConfig();
 const chatHistory = ref([...defaultPrompt]);
 const chatInput = ref("");
-// being used for scroll behaviour
+// To add autoscroll functionality in the chatbox
 const chatBox = ref(null);
-// to show the ai input or the normal input
-const showPrompt = ref(true); 
+// To show the ai input or the normal input
+const showPrompt = ref(true);
 const genAI = new GoogleGenerativeAI(config.public.apiKey);
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
@@ -177,7 +179,7 @@ let chat = model.startChat({
   },
 });
 
-// to add tasks using ai with chat like feature
+// To add tasks using ai with chat like feature
 async function startAiConversation() {
   buttonDisabled.value = true;
   loading.value = true;
@@ -191,15 +193,31 @@ async function startAiConversation() {
   scrollToBottom();
   chatInput.value = "";
   buttonDisabled.value = false;
+  console.log(checkOutput());
+
+  // if the output contains then add the tasks 
+  checkOutput() ? acceptOutput() : null;
   loading.value = false;
+}
+
+
+// check whether the output given by ai contains the array
+const checkOutput = () => {
+  let output = chatHistory.value[chatHistory.value.length - 1].parts[0].text;
+  if (output.includes("[") && output.includes("]")) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 // To accept the final response by the ai which contains an array of todos
 const acceptOutput = () => {
   try {
-    buttonDisabled.value = true;
     // Access the last element from history
     const res = chatHistory.value[chatHistory.value.length - 1].parts[0].text; // Use array indexing to get the last element
+    console.log(res);
+
     console.log('output is: ', res)
     const firstIndex = res.indexOf("["); // Find the index of the first '[' character
     const lastIndex = res.lastIndexOf("]"); // Find the index of the last ']' character
@@ -224,6 +242,7 @@ const acceptOutput = () => {
         console.log(item)
         addTodo(item);
       });
+      alert('tasks added')
       return array;
     }
 
@@ -231,8 +250,6 @@ const acceptOutput = () => {
     console.error(error);
     alert("No array found in the response try a response which contains an array [].");
     return null;
-  } finally {
-    buttonDisabled.value = false;
   }
 }
 
@@ -252,7 +269,7 @@ const addTodo = async (formData) => {
   }
 };
 
-// to toggle the completed property of a todo
+// To toggle the completed property of a todo
 const toggleTodo = async (id) => {
   const { data, error } = await supabase
     .from("tasks")
@@ -268,7 +285,7 @@ const toggleTodo = async (id) => {
     console.log("Task updated successfully:", data);
   }
 };
-// to delete the todo
+// To delete the todo
 const deleteToDo = async (id) => {
   console.log("deleteToDo");
   console.log(todos.value[id]);
